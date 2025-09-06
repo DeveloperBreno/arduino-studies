@@ -77,8 +77,8 @@ void initCamera() {
   config.pin_reset = RESET_GPIO_NUM;
   config.xclk_freq_hz = 20000000;
   config.pixel_format = PIXFORMAT_JPEG;
-  config.frame_size = FRAMESIZE_QQVGA;
-  config.jpeg_quality = 40;
+  config.frame_size = FRAMESIZE_VGA;
+  config.jpeg_quality = 5;
   config.fb_count = 1;
   config.fb_location = CAMERA_FB_IN_PSRAM;
   esp_log_level_set("*", ESP_LOG_NONE);
@@ -125,7 +125,6 @@ bool connectWiFi() {
     return false;
   }
 }
-
 void captureAndSendImage() {
   digitalWrite(LED_GPIO_NUM, HIGH);
   delay(100);
@@ -143,6 +142,9 @@ void captureAndSendImage() {
   http.begin(serverUrl);
   http.addHeader("Content-Type", contentType);
 
+  // ⏱️ Aumenta o tempo de espera para 30 segundos
+  http.setTimeout(30000); // 30.000 ms = 30 segundos
+
   // Cabeçalho do corpo
   String bodyStart = "--" + boundary + "\r\n";
   bodyStart += "Content-Disposition: form-data; name=\"image\"; filename=\"photo.jpg\"\r\n";
@@ -150,7 +152,6 @@ void captureAndSendImage() {
 
   String bodyEnd = "\r\n--" + boundary + "--\r\n";
 
-  // Monta o corpo completo em um buffer
   int totalLength = bodyStart.length() + fb->len + bodyEnd.length();
   uint8_t *body = (uint8_t *)malloc(totalLength);
   if (!body) {
@@ -179,6 +180,7 @@ void captureAndSendImage() {
   esp_camera_fb_return(fb);
   digitalWrite(LED_GPIO_NUM, LOW);
 }
+
 
 
 void setup() {
@@ -224,12 +226,11 @@ void loop() {
       WiFi.disconnect(true);
       delay(1000);
       SerialBT.begin("ESP32CAM_BT");  // Reativa Bluetooth se falhar
-      wifiConfigured = false;
     }
   }
 
   if (wifiConnected) {
     captureAndSendImage();
-    delay(5000);
   }
+  delay(1000);
 }
