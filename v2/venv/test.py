@@ -13,6 +13,9 @@ import numpy as np
 import requests
 import time
 import os
+from pymongo import MongoClient
+
+
 
 mp_face_mesh = mp.solutions.face_mesh
 face_mesh = mp_face_mesh.FaceMesh(static_image_mode=True)
@@ -30,6 +33,14 @@ face_model_3d = np.array([
     (-150.0, -150.0, -125.0),    # Left mouth corner
     (150.0, -150.0, -125.0)      # Right mouth corner
 ], dtype=np.float64)
+
+
+def enviar_objeto_para_mongodb(obj):
+    client = MongoClient("mongodb://localhost:27017/")
+    db = client["testeDB"]
+    collection = db["leituras"]
+    collection.insert_one(obj)
+
 
 def get_head_pose_euler_angles(img_w, img_h, face_landmarks):
     # 2D image points from the face landmarks
@@ -368,6 +379,19 @@ def process_image(image_path):
 
     if should_upload:
         enviar_imagem_para_servidor(image_path)
+        
+    
+    doc = {
+        "timestamp": datetime.now(),
+        "maisDeUmaPessoa": maisDeUmaPessoa,
+        "maoProximaAoRosto": maoProximaAoRosto,
+        "olhosMuitoAbertos": olhosMuitoAbertos,
+        "cabecaBaixa": cabecaBaixa,
+        "olhosFechados": olhosFechados,
+        "bocejo": bocejo
+    }
+    enviar_objeto_para_mongodb(doc)
+
 
     print(f"maisDeUmaPessoa\t\t: {maisDeUmaPessoa}")
     print(f"maoProximaAoRosto\t: {maoProximaAoRosto}")
