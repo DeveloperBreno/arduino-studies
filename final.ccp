@@ -8,7 +8,8 @@
 
 #define LED_BUILTIN 4
 #define LED_GPIO_NUM 4
-const char *serverUrl = "http://incar.gsalute.com.br/upload.php";
+// esse guid deve ser alterado para cada esp32 
+const char *serverUrl = "http://incar.gsalute.com.br/upload.php?text=d7f3a9e2-8c4b-4a1f-9b6f-3e2c9e5d1a7b";
 const char *path = "/c.txt";
 
 BluetoothSerial SerialBT;
