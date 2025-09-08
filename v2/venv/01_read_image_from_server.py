@@ -18,6 +18,7 @@ from pymongo import MongoClient
 import logging
 import absl.logging
 import re
+import subprocess
 
 # Suppress TensorFlow Lite/MediaPipe warnings
 absl.logging.set_verbosity(absl.logging.ERROR)
@@ -412,7 +413,16 @@ def process_image(image_path):
         "bocejo": bocejo,
         "guid": guid
     }
+    
     enviar_objeto_para_mongodb(doc)
+
+    # Call mongo_db_read.py with the guid
+    try:
+        subprocess.run(["python", "02_mongo_db_read.py", guid], check=True)
+    except subprocess.CalledProcessError as e:
+        print(f"Erro ao chamar 02_mongo_db_read.py: {e}")
+    except FileNotFoundError:
+        print("Erro: 02_mongo_db_read.py não encontrado. Verifique o caminho.")
 
     print(f"maisDeUmaPessoa\t\t: {maisDeUmaPessoa}")
     print(f"maoProximaAoRosto\t: {maoProximaAoRosto}")
