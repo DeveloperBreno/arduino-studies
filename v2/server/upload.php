@@ -1,6 +1,5 @@
 <?php
 
-
 //curl -X POST http://incar.gsalute.com.br/upload.php -F "image=@f.png"
 
 date_default_timezone_set('America/Sao_Paulo'); // Garante horário local correto

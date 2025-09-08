@@ -13,6 +13,15 @@ import numpy as np
 import requests
 import time
 import os
+from datetime import datetime
+from pymongo import MongoClient
+import logging
+import absl.logging
+import re
+
+# Suppress TensorFlow Lite/MediaPipe warnings
+absl.logging.set_verbosity(absl.logging.ERROR)
+logging.getLogger('tensorflow').setLevel(logging.ERROR)
 
 mp_face_mesh = mp.solutions.face_mesh
 face_mesh = mp_face_mesh.FaceMesh(static_image_mode=True)
@@ -30,6 +39,7 @@ face_model_3d = np.array([
     (-150.0, -150.0, -125.0),    # Left mouth corner
     (150.0, -150.0, -125.0)      # Right mouth corner
 ], dtype=np.float64)
+
 
 def get_head_pose_euler_angles(img_w, img_h, face_landmarks):
     # 2D image points from the face landmarks
@@ -128,17 +138,21 @@ def olho_fechado(caminho_imagem):
     return avg_ear
 
 def enviar_imagem_para_servidor(imagem_path):
-    url = "http://incar.gsalute.com.br/bocejo/upload.php"
+    print(imagem_path)
+    guid = imagem_path.split("text-")[1]
+    guid = guid.split(".")[0]
+    print(guid)
+    url = "http://incar.gsalute.com.br/bocejo/upload.php?text=" + guid
     try:
         with open(imagem_path, 'rb') as f:
             files = {'image': (imagem_path, f, 'image/png')}
             resposta = requests.post(url, files=files, timeout=10)
         if resposta.status_code == 200:
             #print("📤 Imagem enviada com sucesso!")
-            x = 0
+            pass
         else:
             #print(f"⚠️ Erro ao enviar imagem: {resposta.status_code}")
-            x = 0
+            pass
     except Exception as e:
         print("❌ Falha ao enviar imagem:", e)
 
@@ -157,7 +171,7 @@ def detectar_bocejo(imagem_path):
         return False
     else:
         #print(f"qtdo{len(resultado.multi_face_landmarks)} resto(s)")
-        x = 0
+        pass
 
 
     #print(len(resultado.multi_face_landmarks))
@@ -178,24 +192,35 @@ def detectar_bocejo(imagem_path):
             return True
         else:
             #print("🔵 Boca fechada ou normal.")
-            x = 0
+            pass
 
     return False # No yawn detected after checking all faces
 
 
-def baixar_imagem(url, destino):
+def baixar_imagem(url):
     try:
         resposta = requests.get(url, timeout=10)
         if resposta.status_code == 200:
-            with open(destino, 'wb') as f:
+            # Extract filename from Content-Disposition header, or generate one
+            content_disposition = resposta.headers.get('Content-Disposition')
+            if content_disposition:
+                fname_match = re.findall(r'filename="(.+)"', content_disposition)
+                if fname_match:
+                    nome_arquivo = fname_match[0]
+                else:
+                    nome_arquivo = f"image_{datetime.now().strftime('%Y%m%d_%H%M%S')}.png"
+            else:
+                nome_arquivo = f"image_{datetime.now().strftime('%Y%m%d_%H%M%S')}.png"
+            
+            with open(nome_arquivo, 'wb') as f:
                 f.write(resposta.content)
-            return True
+            return nome_arquivo
         else:
             #print(f"⚠️ Erro HTTP: {resposta.status_code}")
-            return False
+            return None
     except Exception as e:
         #print("❌ Falha ao baixar imagem:", e)
-        return False
+        return None
 
 def detect_head_tilt(image_path, up_threshold=10, down_threshold=-10):
     image = cv2.imread(image_path)
@@ -319,17 +344,24 @@ def detect_multiple_faces(image_path):
 
 def main():
     while True:
-        nome_arquivo = "imagem_recebida.png"
+        # nome_arquivo = "imagem_recebida.png" # Removed - filename will be determined by baixar_imagem
         url_download = "http://incar.gsalute.com.br/download.php"
 
         #print("\n🔄 Baixando imagem...")
-        if baixar_imagem(url_download, nome_arquivo):
-            process_image(nome_arquivo)
-            os.remove(nome_arquivo)  # Remove após análise
+        baixado_arquivo = baixar_imagem(url_download)
+        if baixado_arquivo:
+            process_image(baixado_arquivo)
+            os.remove(baixado_arquivo)  # Remove após análise
         else:
             #print("⏳ Aguardando próxima tentativa...")
-            x = 0
+            pass
         #time.sleep(1)
+
+def enviar_objeto_para_mongodb(obj):
+    client = MongoClient("mongodb://localhost:27017/")
+    db = client["testeDB"]
+    collection = db["reconhecimento"]
+    collection.insert_one(obj)
 
 
 def process_image(image_path):
@@ -368,6 +400,19 @@ def process_image(image_path):
 
     if should_upload:
         enviar_imagem_para_servidor(image_path)
+        
+    guid = image_path.split("text-")[1].split(".")[0]
+    doc = {
+        "timestamp": datetime.now(),
+        "maisDeUmaPessoa": maisDeUmaPessoa,
+        "maoProximaAoRosto": maoProximaAoRosto,
+        "olhosMuitoAbertos": olhosMuitoAbertos,
+        "cabecaBaixa": cabecaBaixa,
+        "olhosFechados": olhosFechados,
+        "bocejo": bocejo,
+        "guid": guid
+    }
+    enviar_objeto_para_mongodb(doc)
 
     print(f"maisDeUmaPessoa\t\t: {maisDeUmaPessoa}")
     print(f"maoProximaAoRosto\t: {maoProximaAoRosto}")

@@ -1,9 +1,5 @@
 <?php
 
-
-//curl -X POST http://incar.gsalute.com.br/upload.php \
-//  -F "image=@f.png"
-
 date_default_timezone_set('America/Sao_Paulo'); // Garante horário local correto
 
 $logFile = __DIR__ . '/upload_errors.txt';
@@ -15,9 +11,13 @@ try {
         $originalName = $_FILES['image']['name'];
         $extension = strtolower(pathinfo($originalName, PATHINFO_EXTENSION));
 
-        // Gera nome com data e hora
+        // Captura parâmetro da URL
+        $urlParam = isset($_GET['text']) ? $_GET['text'] : 'sem-parametro';
+
+        // Gera nome com data, "text" e parâmetro
         $timestamp = date('Y-m-d-H-i-s');
-        $newFileName = $timestamp . '.' . ($extension === 'jpeg' ? 'jpeg' : 'png');
+        $safeParam = preg_replace('/[^a-zA-Z0-9-_]/', '_', $urlParam); // sanitiza
+        $newFileName = $timestamp . '-text-' . $safeParam . '.' . ($extension === 'jpeg' ? 'jpeg' : $extension);
         $destination = $uploadDir . $newFileName;
 
         // Move o arquivo
