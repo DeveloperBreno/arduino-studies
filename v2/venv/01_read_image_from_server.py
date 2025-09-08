@@ -424,15 +424,6 @@ def process_image(image_path):
     except FileNotFoundError:
         print("Erro: 02_mongo_db_read.py não encontrado. Verifique o caminho.")
 
-    print(f"maisDeUmaPessoa\t\t: {maisDeUmaPessoa}")
-    print(f"maoProximaAoRosto\t: {maoProximaAoRosto}")
-    print(f"olhosMuitoAbertos\t: {olhosMuitoAbertos}")
-    print(f"cabecaBaixa\t\t: {cabecaBaixa}")
-    print(f"olhosFechados\t\t: {olhosFechados}")
-    print(f"bocejo\t\t\t: {bocejo}")
-    print("" * 2)
-    print("--------------------------------")
-    print("" * 2)
 
 
 if __name__ == "__main__":
