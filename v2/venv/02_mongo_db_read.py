@@ -13,7 +13,7 @@ db = client["testeDB"]
 collection = db["reconhecimento"]
 
 # Initialize counters for the attributes
-attribute_counts = {
+contador = {
     "maisDeUmaPessoa": 0,
     "maoProximaAoRosto": 0,
     "olhosMuitoAbertos": 0,
@@ -30,10 +30,29 @@ for doc in collection.find({"guid": camera_guid}).sort("timestamp", -1).limit(10
     print("---------------------------------")
 
     # Increment counters if attribute is True
-    for attr in attribute_counts.keys():
+    for attr in contador.keys():
         if doc.get(attr, False):
-            attribute_counts[attr] += 1
+            contador[attr] += 1
 
 print("\n📊 Frequência dos atributos nos últimos 10 registros:")
-for attr, count in attribute_counts.items():
+for attr, count in contador.items():
     print(f"{attr}: {count} ocorrência(s)")
+
+
+
+ "maisDeUmaPessoa": 0,
+    "maoProximaAoRosto": 0,
+    "olhosMuitoAbertos": 0,
+    "cabecaBaixa": 0,
+    "olhosFechados": 0,
+   
+
+if (contador["maisDeUmaPessoa"] > 2 or 
+        contador["maoProximaAoRosto"] > 4 or
+        contador["olhosMuitoAbertos"] > 3 or
+        contador["cabecaBaixa"] > 2 or
+        contador["olhosFechados"] > 3 or
+        contador["bocejo"] > 2):
+    print("alerta")
+
+
