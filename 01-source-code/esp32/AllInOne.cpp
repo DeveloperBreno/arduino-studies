@@ -23,8 +23,8 @@
 #define PCLK_GPIO_NUM     22
 
 // ==================== CONFIG ====================
-const char* WIFI_FILE = "/w.txt";
-String ssid_from_spiffs, pass_from_spiffs;
+const char* WIFI_FILE = "/wifi.txt";
+String ssid_from_spiffs, pass_from_spiffs, guid_user;
 
 // WebSocket server configuration
 const char* websocket_server = "192.168.0.16";
@@ -47,13 +47,18 @@ CameraMode currentCameraMode = CAMERA_MODE_NONE;
 struct quirc *q;
 
 // ==================== FUNÇÕES ====================
-bool parseSsidSenha(const String &line, String &s, String &p) {
-  int sep = line.indexOf(';');
-  if (sep < 1) return false;
-  s = line.substring(0, sep);
-  p = line.substring(sep + 1);
-  s.trim(); p.trim();
-  return (s.length() > 0);
+bool parseSsidSenha(const String &line, String &s, String &p, String &g) {
+  int firstSep = line.indexOf(';');
+  if (firstSep < 1) return false;
+  s = line.substring(0, firstSep);
+  
+  int secondSep = line.indexOf(';', firstSep + 1);
+  if (secondSep == -1) return false; // GUID is mandatory
+  p = line.substring(firstSep + 1, secondSep);
+  g = line.substring(secondSep + 1);
+
+  s.trim(); p.trim(); g.trim();
+  return (s.length() > 0 && g.length() > 0);
 }
 
 bool loadCredentials() {
@@ -62,13 +67,13 @@ bool loadCredentials() {
   if (!f) return false;
   String line = f.readStringUntil('\n');
   f.close();
-  return parseSsidSenha(line, ssid_from_spiffs, pass_from_spiffs);
+  return parseSsidSenha(line, ssid_from_spiffs, pass_from_spiffs, guid_user);
 }
 
-bool saveCredentials(const String &s, const String &p) {
+bool saveCredentials(const String &s, const String &p, const String &g) {
   File f = SPIFFS.open(WIFI_FILE, FILE_WRITE);
   if (!f) return false;
-  f.printf("%s;%s\n", s.c_str(), p.c_str());
+  f.printf("%s;%s;%s\n", s.c_str(), p.c_str(), g.c_str());
   f.close();
   return true;
 }
@@ -213,10 +218,10 @@ void qrTask(void *pvParameters) {
             if (quirc_decode(&code, &data) == 0) {
               qrText = String((char*)data.payload);
               Serial.printf("QR: %s\n", qrText.c_str());
-              String s,p;
-              if(parseSsidSenha(qrText,s,p)) {
+              String s,p,g;
+              if(parseSsidSenha(qrText,s,p,g)) {
                 if(connectWiFi(s,p)) {
-                  saveCredentials(s,p);
+                  saveCredentials(s,p,g);
                   Serial.println("Conectado e salvo!");
                   // De-initialize camera and activate photo task
                   deinitCamera();
@@ -225,6 +230,8 @@ void qrTask(void *pvParameters) {
                   vTaskSuspend(NULL); // Suspend self
                 }
               }
+            }else{
+              Serial.println("Não encontramos nenhum texto");
             }
           }
         }
@@ -267,6 +274,10 @@ void sendPhotoTask(void *pvParameters) {
           fb = esp_camera_fb_get();
           if(fb) {
             Serial.printf("[Send Photo Task] Enviando imagem, tamanho: %zu bytes...\n", fb->len);
+            // Send GUID as a text message before the image
+            webSocket.sendTXT(guid_user);
+            Serial.printf("[Send Photo Task] Enviando GUID: %s\n", guid_user.c_str());
+
             bool sent = webSocket.sendBIN(fb->buf, fb->len);
             if(sent) {
               Serial.println("[Send Photo Task] Imagem enviada com sucesso!");
@@ -348,4 +359,3 @@ void loop() {
   // Loop principal leve, as tarefas são gerenciadas pelas FreeRTOS tasks
   delay(1000);
 }
-
