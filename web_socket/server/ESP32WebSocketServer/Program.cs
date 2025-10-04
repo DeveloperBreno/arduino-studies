@@ -47,6 +47,12 @@ while (true)
                     await File.WriteAllBytesAsync(path, ms.ToArray());
                     Console.WriteLine($"Imagem salva: {fileName}");
                 }
+                else if (result.MessageType == WebSocketMessageType.Text)
+                {
+                    // Mostrar texto recebido
+                    string text = Encoding.UTF8.GetString(ms.ToArray());
+                    Console.WriteLine($"Texto recebido: {text}");
+                }
             }
             catch (Exception ex)
             {
