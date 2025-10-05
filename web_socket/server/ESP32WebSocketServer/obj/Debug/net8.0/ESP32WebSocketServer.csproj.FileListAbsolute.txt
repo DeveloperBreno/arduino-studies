@@ -1,0 +1,15 @@
+/home/on/git/arduino-studies/web_socket/server/ESP32WebSocketServer/bin/Debug/net8.0/ESP32WebSocketServer
+/home/on/git/arduino-studies/web_socket/server/ESP32WebSocketServer/bin/Debug/net8.0/ESP32WebSocketServer.deps.json
+/home/on/git/arduino-studies/web_socket/server/ESP32WebSocketServer/bin/Debug/net8.0/ESP32WebSocketServer.runtimeconfig.json
+/home/on/git/arduino-studies/web_socket/server/ESP32WebSocketServer/bin/Debug/net8.0/ESP32WebSocketServer.dll
+/home/on/git/arduino-studies/web_socket/server/ESP32WebSocketServer/bin/Debug/net8.0/ESP32WebSocketServer.pdb
+/home/on/git/arduino-studies/web_socket/server/ESP32WebSocketServer/obj/Debug/net8.0/ESP32WebSocketServer.GeneratedMSBuildEditorConfig.editorconfig
+/home/on/git/arduino-studies/web_socket/server/ESP32WebSocketServer/obj/Debug/net8.0/ESP32WebSocketServer.AssemblyInfoInputs.cache
+/home/on/git/arduino-studies/web_socket/server/ESP32WebSocketServer/obj/Debug/net8.0/ESP32WebSocketServer.AssemblyInfo.cs
+/home/on/git/arduino-studies/web_socket/server/ESP32WebSocketServer/obj/Debug/net8.0/ESP32WebSocketServer.csproj.CoreCompileInputs.cache
+/home/on/git/arduino-studies/web_socket/server/ESP32WebSocketServer/obj/Debug/net8.0/ESP32WebSocketServer.sourcelink.json
+/home/on/git/arduino-studies/web_socket/server/ESP32WebSocketServer/obj/Debug/net8.0/ESP32WebSocketServer.dll
+/home/on/git/arduino-studies/web_socket/server/ESP32WebSocketServer/obj/Debug/net8.0/refint/ESP32WebSocketServer.dll
+/home/on/git/arduino-studies/web_socket/server/ESP32WebSocketServer/obj/Debug/net8.0/ESP32WebSocketServer.pdb
+/home/on/git/arduino-studies/web_socket/server/ESP32WebSocketServer/obj/Debug/net8.0/ESP32WebSocketServer.genruntimeconfig.cache
+/home/on/git/arduino-studies/web_socket/server/ESP32WebSocketServer/obj/Debug/net8.0/ref/ESP32WebSocketServer.dll

@@ -1,0 +1,15 @@
+/home/on/git/arduino-studies/web_socket/TestSecondClient/bin/Debug/net8.0/TestSecondClient
+/home/on/git/arduino-studies/web_socket/TestSecondClient/bin/Debug/net8.0/TestSecondClient.deps.json
+/home/on/git/arduino-studies/web_socket/TestSecondClient/bin/Debug/net8.0/TestSecondClient.runtimeconfig.json
+/home/on/git/arduino-studies/web_socket/TestSecondClient/bin/Debug/net8.0/TestSecondClient.dll
+/home/on/git/arduino-studies/web_socket/TestSecondClient/bin/Debug/net8.0/TestSecondClient.pdb
+/home/on/git/arduino-studies/web_socket/TestSecondClient/obj/Debug/net8.0/TestSecondClient.GeneratedMSBuildEditorConfig.editorconfig
+/home/on/git/arduino-studies/web_socket/TestSecondClient/obj/Debug/net8.0/TestSecondClient.AssemblyInfoInputs.cache
+/home/on/git/arduino-studies/web_socket/TestSecondClient/obj/Debug/net8.0/TestSecondClient.AssemblyInfo.cs
+/home/on/git/arduino-studies/web_socket/TestSecondClient/obj/Debug/net8.0/TestSecondClient.csproj.CoreCompileInputs.cache
+/home/on/git/arduino-studies/web_socket/TestSecondClient/obj/Debug/net8.0/TestSecondClient.sourcelink.json
+/home/on/git/arduino-studies/web_socket/TestSecondClient/obj/Debug/net8.0/TestSecondClient.dll
+/home/on/git/arduino-studies/web_socket/TestSecondClient/obj/Debug/net8.0/refint/TestSecondClient.dll
+/home/on/git/arduino-studies/web_socket/TestSecondClient/obj/Debug/net8.0/TestSecondClient.pdb
+/home/on/git/arduino-studies/web_socket/TestSecondClient/obj/Debug/net8.0/TestSecondClient.genruntimeconfig.cache
+/home/on/git/arduino-studies/web_socket/TestSecondClient/obj/Debug/net8.0/ref/TestSecondClient.dll
