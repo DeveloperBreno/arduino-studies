@@ -5,7 +5,7 @@ using System.Text;
 Console.WriteLine("Servidor WebSocket .NET 8 iniciado...");
 
 HttpListener listener = new HttpListener();
-listener.Prefixes.Add("http://+:8080/ws/"); // Porta 8080
+listener.Prefixes.Add("http://+:8080/ws/");
 listener.Start();
 Console.WriteLine("Aguardando conexões...");
 
@@ -17,47 +17,59 @@ while (true)
 
     if (context.Request.IsWebSocketRequest)
     {
-        var wsContext = await context.AcceptWebSocketAsync(null);
-        var webSocket = wsContext.WebSocket;
-        Console.WriteLine("ESP32 conectado!");
-
-        var buffer = new byte[1024 * 32]; // 32 KB por pacote
-        while (webSocket.State == WebSocketState.Open)
+        _ = Task.Run(async () =>
         {
+            var wsContext = await context.AcceptWebSocketAsync(null);
+            var webSocket = wsContext.WebSocket;
+            Console.WriteLine("Novo cliente conectado!");
+
+            string clientName = "desconhecido";
+            var buffer = new byte[1024 * 32];
+
             try
             {
-                var ms = new MemoryStream();
-                WebSocketReceiveResult result;
-                do
+                while (webSocket.State == WebSocketState.Open)
                 {
-                    result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
-                    ms.Write(buffer, 0, result.Count);
-                } while (!result.EndOfMessage);
+                    var ms = new MemoryStream();
+                    WebSocketReceiveResult result;
+                    do
+                    {
+                        result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
+                        ms.Write(buffer, 0, result.Count);
+                    } while (!result.EndOfMessage);
 
-                if (result.MessageType == WebSocketMessageType.Close)
-                {
-                    await webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "", CancellationToken.None);
-                    Console.WriteLine("Conexão fechada");
-                }
-                else if (result.MessageType == WebSocketMessageType.Binary)
-                {
-                    // Salvar imagem
-                    string fileName = $"image_{imageCounter++}.jpg";
-                    string path = Path.Combine(AppContext.BaseDirectory, fileName);
-                    await File.WriteAllBytesAsync(path, ms.ToArray());
-                    Console.WriteLine($"Imagem salva: {fileName}");
-                }
-                else if (result.MessageType == WebSocketMessageType.Text)
-                {
-                    // Mostrar texto recebido
-                    string text = Encoding.UTF8.GetString(ms.ToArray());
-                    Console.WriteLine($"Texto recebido: {text}");
+                    if (result.MessageType == WebSocketMessageType.Close)
+                    {
+                        await webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "", CancellationToken.None);
+                        Console.WriteLine($"Conexão fechada ({clientName})");
+                    }
+                    else if (result.MessageType == WebSocketMessageType.Binary)
+                    {
+                        string clientDir = Path.Combine(AppContext.BaseDirectory, clientName);
+                        Directory.CreateDirectory(clientDir);
+
+                        string fileName = $"image_{Interlocked.Increment(ref imageCounter)}.jpg";
+                        string path = Path.Combine(clientDir, fileName);
+                        await File.WriteAllBytesAsync(path, ms.ToArray());
+
+                        Console.WriteLine($"Imagem salva: {clientName}/{fileName}");
+                    }
+                    else if (result.MessageType == WebSocketMessageType.Text)
+                    {
+                        string text = Encoding.UTF8.GetString(ms.ToArray()).Trim();
+                        Console.WriteLine($"Texto recebido: {text}");
+
+                        clientName = text;
+                        string clientDir = Path.Combine(AppContext.BaseDirectory, clientName);
+                        Directory.CreateDirectory(clientDir);
+                        Console.WriteLine($"Cliente identificado como: {clientName}");
+                    }
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Erro: " + ex.Message);
+                Console.WriteLine($"Erro ({clientName}): {ex.Message}");
             }
-        }
+        });
     }
 }
